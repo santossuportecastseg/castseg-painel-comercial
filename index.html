@@ -1,0 +1,1118 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Castseg Distribuição - Painel Comercial</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<style>
+:root{
+  --navy:#0f1729;
+  --navy-soft:#182238;
+  --accent:#ff6b35;
+  --accent-dark:#e2571f;
+  --bg:#f4f5f9;
+  --surface:#ffffff;
+  --border:#e3e6ee;
+  --ink:#101828;
+  --muted:#667085;
+  --success:#12b76a; --success-bg:#e6f9f0;
+  --warning:#f79009; --warning-bg:#fef3e0;
+  --danger:#f04438; --danger-bg:#fde8e6;
+  --info:#2e90fa; --info-bg:#e8f2fe;
+  --social:#7f56d9; --social-bg:#f3edfe;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--ink);}
+.mono{font-family:'IBM Plex Mono',monospace;}
+h1,h2,h3,.card-title,.nav-item,.stat-label{font-family:'Manrope',sans-serif;}
+
+/* SHELL */
+.app-shell{display:flex;height:100vh;overflow:hidden;}
+.app-nav{width:230px;background:var(--navy);color:#cbd3e1;display:flex;flex-direction:column;flex-shrink:0;}
+.nav-logo{padding:22px 20px 16px;border-bottom:1px solid rgba(255,255,255,0.08);}
+.nav-logo h1{color:#fff;font-size:19px;font-weight:800;letter-spacing:.3px;}
+.nav-logo span{display:block;color:var(--accent);font-size:11px;font-weight:600;margin-top:3px;}
+.brand-strip{display:flex;flex-wrap:wrap;gap:5px;margin-top:10px;}
+.brand-pill{font-size:8.5px;font-weight:700;padding:3px 6px;border-radius:9px;background:rgba(255,255,255,0.07);color:#a6b0c3;letter-spacing:.4px;}
+.nav-list{flex:1;padding:14px 0;display:flex;flex-direction:column;gap:2px;overflow-y:auto;}
+.nav-item{display:flex;align-items:center;gap:11px;padding:11px 20px;font-size:13px;font-weight:600;color:#94a0b8;cursor:pointer;border-left:3px solid transparent;transition:.15s;}
+.nav-item svg{width:18px;height:18px;flex-shrink:0;}
+.nav-item:hover{background:var(--navy-soft);color:#fff;}
+.nav-item.active{background:var(--navy-soft);color:#fff;border-left-color:var(--accent);}
+.nav-foot{padding:14px 20px;font-size:10px;color:#5c6579;border-top:1px solid rgba(255,255,255,0.08);}
+
+.app-main{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.app-topbar{height:62px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 26px;flex-shrink:0;}
+.app-topbar h2{font-size:17px;font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.meta-tracker{display:flex;align-items:center;gap:12px;background:#feebc8;padding:5px 14px;border-radius:20px;font-size:12.5px;font-weight:700;color:var(--accent-dark);}
+.meta-btn{background:var(--accent);border:none;color:#fff;width:19px;height:19px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px;}
+
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;padding:18px 26px 0;flex-shrink:0;}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px;display:flex;flex-direction:column;gap:4px;}
+.stat-label{font-size:10.5px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);font-weight:700;}
+.stat-value{font-size:21px;font-weight:600;color:var(--ink);}
+.stat-sub{font-size:11px;color:var(--muted);font-weight:600;}
+
+.app-content{flex:1;overflow-y:auto;padding:20px 26px 30px;}
+.app-section{display:none;flex-direction:column;gap:20px;}
+.app-section.active{display:flex;}
+
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;box-shadow:0 1px 2px rgba(16,24,40,.04);}
+.card-title{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;font-weight:700;font-size:13.5px;text-transform:uppercase;letter-spacing:.4px;border-bottom:1px solid var(--border);padding-bottom:10px;}
+.card-hint{font-size:11.5px;color:var(--muted);font-weight:500;text-transform:none;letter-spacing:0;margin-top:3px;}
+
+.btn{border:none;border-radius:7px;padding:8px 14px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;transition:.15s;display:inline-flex;align-items:center;gap:6px;}
+.btn-primary{background:var(--accent);color:#fff;}
+.btn-primary:hover{background:var(--accent-dark);}
+.btn-ghost{background:transparent;border:1px solid var(--border);color:var(--ink);}
+.btn-ghost:hover{background:var(--bg);}
+.btn-sm{padding:6px 10px;font-size:11.5px;}
+.btn-social{background:var(--social);color:#fff;}
+.btn-social:hover{background:#6a3fc0;}
+
+/* FORMS */
+.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin-bottom:14px;padding:16px;background:#fafbfd;border:1px dashed var(--border);border-radius:10px;}
+.form-grid.hidden{display:none;}
+.form-group label{display:block;font-size:11px;font-weight:700;margin-bottom:4px;color:var(--muted);text-transform:uppercase;letter-spacing:.3px;}
+.form-control{width:100%;padding:8px 11px;border:1px solid var(--border);border-radius:7px;font-size:13px;outline:none;font-family:'Inter',sans-serif;background:#fff;}
+.form-control:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(255,107,53,0.12);}
+.form-actions{grid-column:1/-1;display:flex;gap:8px;margin-top:4px;}
+
+/* TABLES */
+.data-table{width:100%;border-collapse:collapse;font-size:12.5px;}
+.data-table th{text-align:left;font-size:10.5px;text-transform:uppercase;letter-spacing:.3px;color:var(--muted);padding:8px 10px;border-bottom:2px solid var(--border);font-weight:700;}
+.data-table td{padding:10px;border-bottom:1px solid var(--border);vertical-align:middle;}
+.data-table tr:last-child td{border-bottom:none;}
+.table-actions{display:flex;gap:10px;}
+.link-btn{background:none;border:none;color:var(--accent);font-weight:700;font-size:11.5px;cursor:pointer;}
+.link-btn.delete{color:var(--danger);}
+
+.badge{font-size:9.5px;font-weight:700;padding:3px 8px;border-radius:20px;text-transform:uppercase;letter-spacing:.2px;white-space:nowrap;}
+.badge-success{background:var(--success-bg);color:var(--success);}
+.badge-warning{background:var(--warning-bg);color:var(--warning);}
+.badge-danger{background:var(--danger-bg);color:var(--danger);}
+.badge-info{background:var(--info-bg);color:var(--info);}
+.badge-social{background:var(--social-bg);color:var(--social);}
+.badge-neutral{background:#edf0f5;color:var(--ink);}
+
+.status-select{border:1px solid var(--border);border-radius:6px;padding:4px 8px;font-size:11.5px;font-weight:700;background:#fff;}
+
+.empty-hint{color:var(--muted);font-size:12.5px;font-style:italic;padding:14px 0;text-align:center;}
+
+/* PROSPECCAO */
+.prospeccao-row{display:grid;grid-template-columns:290px 1fr;gap:20px;align-items:start;}
+.script-box{background:#fafbfd;border:1px solid var(--border);border-left:3px solid var(--accent);padding:10px 12px;font-size:12px;font-style:italic;border-radius:0 6px 6px 0;cursor:pointer;margin-bottom:9px;color:#3d4451;}
+.script-box:hover{background:#fff3ea;}
+.script-box.social{border-left-color:var(--social);}
+.script-box.social:hover{background:#f8f4ff;}
+.script-label{font-size:9.5px;font-weight:800;text-transform:uppercase;color:var(--accent-dark);display:block;margin-bottom:4px;font-style:normal;letter-spacing:.3px;}
+.script-box.social .script-label{color:var(--social);}
+.script-static{font-size:11.5px;color:var(--muted);line-height:1.6;font-style:normal;}
+.side-subtitle{font-size:10.5px;font-weight:800;text-transform:uppercase;color:var(--muted);letter-spacing:.4px;margin:14px 0 8px;}
+.side-subtitle:first-child{margin-top:0;}
+
+.top-row2{display:grid;grid-template-columns:1.5fr 1fr;gap:20px;}
+.week-grid{display:flex;flex-direction:column;gap:9px;}
+.day-row{display:flex;border:1px solid var(--border);border-radius:7px;overflow:hidden;}
+.day-badge{width:105px;background:var(--navy);color:#fff;display:flex;align-items:center;justify-content:center;font-size:10.5px;font-weight:700;text-transform:uppercase;text-align:center;padding:6px;flex-shrink:0;}
+.day-row.active .day-badge{background:var(--accent);}
+.day-content{flex:1;padding:9px 13px;font-size:12px;display:flex;align-items:center;justify-content:space-between;background:#fafbfd;gap:8px;}
+.day-row.active .day-content{background:#fff8f2;}
+
+.social-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;}
+.social-channel{border:1px solid var(--border);border-radius:8px;padding:11px;background:var(--social-bg);}
+.social-channel h4{font-size:12px;color:var(--social);margin-bottom:5px;}
+.social-channel p{font-size:11.5px;color:#5c5470;line-height:1.4;}
+
+.pipeline-container{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
+.pipe-column{background:var(--bg);border-radius:8px;padding:11px;display:flex;flex-direction:column;gap:9px;min-height:120px;}
+.pipe-header{font-size:11px;font-weight:700;text-transform:uppercase;display:flex;justify-content:space-between;align-items:center;padding-bottom:5px;border-bottom:2px solid var(--border);}
+.pipe-count{background:var(--navy);color:#fff;padding:2px 7px;border-radius:10px;font-size:10px;}
+.lead-card{background:#fff;border-radius:6px;padding:11px;border:1px solid var(--border);display:flex;flex-direction:column;gap:5px;}
+.lead-title{font-size:12.5px;font-weight:700;}
+.lead-meta{font-size:10.5px;color:var(--muted);}
+.lead-tags{display:flex;gap:5px;flex-wrap:wrap;margin-top:3px;}
+.lead-actions{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:7px;margin-top:6px;border-top:1px solid var(--bg);padding-top:6px;}
+
+/* AGENDA */
+.agenda-item{display:flex;gap:14px;padding:13px;border:1px solid var(--border);border-radius:10px;background:#fff;align-items:flex-start;}
+.agenda-date{width:64px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--info-bg);color:var(--info);border-radius:8px;padding:8px 4px;font-weight:700;font-size:11.5px;text-align:center;gap:2px;}
+.agenda-body{flex:1;min-width:0;}
+.agenda-title{font-weight:700;font-size:13px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+.agenda-meta{font-size:11px;color:var(--muted);margin-top:3px;}
+.agenda-notas{font-size:11px;color:var(--ink);margin-top:4px;font-style:italic;}
+.agenda-actions{display:flex;flex-direction:column;gap:6px;align-items:flex-end;flex-shrink:0;}
+.agenda-actions a{text-decoration:none;}
+
+/* ===== LOGO + MENU HAMBÚRGUER (MOBILE) ===== */
+.nav-logo-img{width:40px;height:40px;border-radius:9px;background:#fff;padding:4px;object-fit:contain;display:block;}
+.nav-logo-top{display:flex;align-items:center;gap:10px;}
+.nav-logo-top .nav-logo-text h1{font-size:17px;margin:0;}
+.hamburger-btn{display:none;background:none;border:none;cursor:pointer;padding:6px;flex-direction:column;gap:4px;align-items:center;justify-content:center;width:34px;height:34px;border-radius:8px;flex-shrink:0;}
+.hamburger-btn:hover{background:var(--bg);}
+.hamburger-btn span{display:block;width:20px;height:2.4px;background:var(--ink);border-radius:2px;}
+.nav-close-btn{display:none;background:none;border:none;color:#94a0b8;font-size:20px;cursor:pointer;position:absolute;top:14px;right:14px;}
+.nav-overlay{display:none;position:fixed;inset:0;background:rgba(15,23,41,0.55);z-index:40;}
+.nav-overlay.open{display:block;}
+.topbar-brand{display:none;align-items:center;gap:8px;flex-shrink:0;}
+.topbar-brand img{width:26px;height:26px;border-radius:6px;background:#fff;padding:2px;}
+.table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+.table-scroll .data-table{min-width:560px;}
+
+/* ===== SEÇÃO CATÁLOGO ===== */
+.catalog-hero{background:var(--navy);border-radius:12px;padding:22px 24px;display:flex;align-items:center;gap:18px;flex-wrap:wrap;}
+.catalog-hero img{width:64px;height:64px;border-radius:12px;background:#fff;padding:6px;flex-shrink:0;}
+.catalog-hero-text h3{color:#fff;font-size:18px;font-weight:800;margin-bottom:4px;}
+.catalog-hero-text p{color:#a6b0c3;font-size:12.5px;max-width:520px;}
+.catalog-hero-actions{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap;}
+.catalog-brand-block{display:flex;flex-direction:column;gap:12px;}
+.catalog-brand-head{display:flex;align-items:center;gap:10px;}
+.catalog-brand-head h4{font-size:14px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;}
+.catalog-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px;}
+.catalog-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px;display:flex;gap:12px;align-items:flex-start;}
+.catalog-icon{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.catalog-card h5{font-size:12.8px;font-weight:700;margin-bottom:3px;}
+.catalog-card p{font-size:11.3px;color:var(--muted);line-height:1.45;}
+.catalog-cta{background:var(--navy);border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+.catalog-cta p{color:#cbd3e1;font-size:12.5px;flex:1;min-width:220px;}
+.catalog-cta strong{color:#fff;}
+
+@media(max-width:1100px){
+  .prospeccao-row,.top-row2,.stats-row,.social-grid,.pipeline-container{grid-template-columns:1fr;}
+}
+
+@media(max-width:880px){
+  .app-shell{position:relative;}
+  .app-nav{position:fixed;top:0;left:0;height:100vh;z-index:50;transform:translateX(-100%);transition:transform .25s ease;box-shadow:0 0 30px rgba(0,0,0,.3);width:250px;max-width:82vw;}
+  .app-nav.open{transform:translateX(0);}
+  .nav-close-btn{display:block;}
+  .hamburger-btn{display:flex;}
+  .topbar-brand{display:flex;}
+  .app-topbar{padding:0 14px;gap:8px;}
+  .app-topbar h2{font-size:14px;min-width:0;flex:1;}
+  .meta-tracker{font-size:10.5px;padding:4px 8px;gap:6px;flex-shrink:0;}
+  .meta-tracker span:first-child{display:none;}
+  .stats-row{grid-template-columns:repeat(2,1fr) !important;padding:14px 14px 0;}
+  .app-content{padding:14px 14px 24px;}
+  .catalog-hero-actions{margin-left:0;width:100%;}
+}
+@media(max-width:480px){
+  .stats-row{grid-template-columns:1fr 1fr !important;}
+  .stat-value{font-size:17px;}
+}
+</style>
+</head>
+<body>
+
+<div class="app-shell">
+
+  <!-- OVERLAY (fecha o menu ao tocar fora, no mobile) -->
+  <div class="nav-overlay" id="nav-overlay" onclick="closeNav()"></div>
+
+  <!-- MENU LATERAL -->
+  <nav class="app-nav" id="app-nav">
+    <button class="nav-close-btn" onclick="closeNav()" aria-label="Fechar menu">&times;</button>
+    <div class="nav-logo">
+      <div class="nav-logo-top">
+        <img class="nav-logo-img" src="data:image/jpeg;base64,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" alt="Logo Castseg">
+        <div class="nav-logo-text">
+          <h1>Castseg</h1>
+          <span>Distribuidor Autorizado</span>
+        </div>
+      </div>
+      <div class="brand-strip">
+        <span class="brand-pill">HIKVISION</span>
+        <span class="brand-pill">JFL</span>
+        <span class="brand-pill">NICE</span>
+        <span class="brand-pill">CONTROL ID</span>
+      </div>
+    </div>
+    <div class="nav-list">
+      <div class="nav-item active" data-section="prospeccao" onclick="switchSection('prospeccao')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg>
+        Prospecção
+      </div>
+      <div class="nav-item" data-section="clientes" onclick="switchSection('clientes')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="17.5" cy="9" r="2.3"/><path d="M15.7 14.3c2.4.5 4.1 2.6 4.1 5.2"/></svg>
+        Clientes
+      </div>
+      <div class="nav-item" data-section="estoque" onclick="switchSection('estoque')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7l9-4 9 4-9 4-9-4z"/><path d="M3 7v10l9 4 9-4V7"/><path d="M12 11v10"/></svg>
+        Estoque
+      </div>
+      <div class="nav-item" data-section="orcamentos" onclick="switchSection('orcamentos')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h8l4 4v16H6z"/><path d="M14 2v4h4"/><path d="M8 12h8M8 16h8M8 8h4"/></svg>
+        Orçamentos
+      </div>
+      <div class="nav-item" data-section="agenda" onclick="switchSection('agenda')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></svg>
+        Agenda
+      </div>
+      <div class="nav-item" data-section="catalogo" onclick="switchSection('catalogo')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.3"/><rect x="14" y="3" width="7" height="7" rx="1.3"/><rect x="3" y="14" width="7" height="7" rx="1.3"/><rect x="14" y="14" width="7" height="7" rx="1.3"/></svg>
+        Catálogo
+      </div>
+    </div>
+    <div class="nav-foot">Painel Comercial &bull; Baixada Santista</div>
+  </nav>
+
+  <!-- CONTEÚDO PRINCIPAL -->
+  <div class="app-main">
+    <div class="app-topbar">
+      <div style="display:flex;align-items:center;gap:10px;min-width:0;flex:1;overflow:hidden;">
+        <button class="hamburger-btn" onclick="openNav()" aria-label="Abrir menu"><span></span><span></span><span></span></button>
+        <div class="topbar-brand"><img src="data:image/jpeg;base64,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" alt="Castseg"></div>
+        <h2 id="section-title">Prospecção &amp; Funil</h2>
+      </div>
+      <div class="meta-tracker">
+        <span>Meta Semanal: Mínimo 3 Agendamentos</span>
+        <div style="display:flex;align-items:center;gap:8px;margin-left:8px;">
+          <button class="meta-btn" onclick="updateMeta(-1)">-</button>
+          <span id="meta-count" class="mono">0</span> / 3
+          <button class="meta-btn" onclick="updateMeta(1)">+</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-card">
+        <span class="stat-label">Leads em Funil</span>
+        <span class="stat-value mono" id="stat-leads">0</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">Clientes Cadastrados</span>
+        <span class="stat-value mono" id="stat-clientes">0</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">Orçamentos em Aberto</span>
+        <span class="stat-value mono" id="stat-orcamentos">0</span>
+        <span class="stat-sub mono" id="stat-orcamentos-valor">R$ 0,00</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">Próximo Compromisso</span>
+        <span class="stat-value mono" id="stat-agenda" style="font-size:14.5px;">Nenhum</span>
+      </div>
+    </div>
+
+    <div class="app-content">
+
+      <!-- ============ SEÇÃO PROSPECÇÃO ============ -->
+      <section id="section-prospeccao" class="app-section active">
+        <div class="prospeccao-row">
+
+          <!-- Scripts rápidos -->
+          <div class="card">
+            <div class="card-title">Scripts Rápidos</div>
+            <div class="side-subtitle">Abordagem Direta</div>
+            <div class="script-box" onclick="copyText(this)"><span class="script-label">1. Nova Instaladora/Integradora</span>"Olá, tudo bem? Aqui é o Roberto, da Castseg Distribuição. Vi que sua empresa está iniciando na área de segurança eletrônica em Santos. Somos distribuidores diretos Hikvision, JFL, NICE e Control ID, com estoque local e tabela de revenda. Posso te enviar nossa tabela e condições para cadastro de parceiro?"</div>
+            <div class="script-box" onclick="copyText(this)"><span class="script-label">2. Instaladora já ativa</span>"Olá, sou o Roberto da Castseg Distribuição, aqui em Santos/Baixada Santista. Trabalhamos com entrega rápida, suporte técnico local e condições especiais em CFTV, alarme, automação e controle de acesso. Você já tem um distribuidor de referência hoje? Posso te mostrar nossa tabela comparativa?"</div>
+            <div class="script-box" onclick="copyText(this)"><span class="script-label">3. Manutenção Predial/Elétrica</span>"Olá, sou o Roberto da Castseg Distribuição. Muitas empresas de manutenção predial estão agregando CFTV, alarme e controle de acesso como novo braço de receita. Podemos apoiar com produto, treinamento técnico rápido e suporte pós-venda. Faz sentido uma conversa de 15 min essa semana?"</div>
+            <div class="script-box" onclick="copyText(this)"><span class="script-label">4. Follow-up pós tabela</span>"Olá, tudo certo? Enviei nossa tabela de revenda na semana passada. Conseguiu dar uma olhada? Fico à disposição para fechar as condições de cadastro e já deixar um kit de amostra separado."</div>
+
+            <div class="side-subtitle">Redes Sociais</div>
+            <div class="script-box social" onclick="copyText(this)"><span class="script-label">5. LinkedIn (DM)</span>"Olá [Nome], vi que sua empresa atua com instalação/manutenção de sistemas de segurança na Baixada Santista. Somos a Castseg, distribuidor autorizado Hikvision, JFL, NICE e Control ID. Podemos apresentar nossas condições de parceria em uma call rápida essa semana?"</div>
+            <div class="script-box social" onclick="copyText(this)"><span class="script-label">6. Instagram (DM)</span>"Oi! Vimos seu trabalho de instalação por aqui 👏. Somos distribuidores diretos das marcas que vocês já usam (Hikvision, JFL, NICE, Control ID) e temos estoque local em Santos. Quer receber nossa tabela de parceiro?"</div>
+            <div class="script-box social" onclick="copyText(this)"><span class="script-label">7. Grupo de WhatsApp</span>"Pessoal, bom dia! Somos a Castseg Distribuição (Hikvision/JFL/NICE/Control ID), com pronta entrega em Santos. Quem quiser tabela de parceiro ou tirar dúvida técnica, me chama no inbox."</div>
+
+            <div class="side-subtitle">Diferenciais de Campo</div>
+            <div class="script-static">• <b>Multimarcas:</b> 4 fabricantes em um único fornecedor.<br>• <b>Ronda Comercial:</b> tapume/caçamba na rua = instaladora nova em obra próxima.<br>• <b>Isca Digital:</b> kit demonstrativo para quem seguir as redes da distribuidora.</div>
+          </div>
+
+          <!-- Coluna direita -->
+          <div style="display:flex;flex-direction:column;gap:20px;">
+            <div class="top-row2">
+              <div class="card">
+                <div class="card-title">Fluxo de Rotina Semanal</div>
+                <div class="week-grid">
+                  <div class="day-row" id="day-seg">
+                    <div class="day-badge">Segunda</div>
+                    <div class="day-content"><span><b>Manhã:</b> Mineração JUCESP/Redesim (CNAEs de instalação de segurança e manutenção). <b>Tarde:</b> Prospecção em redes sociais e nutrição do CRM.</span><input type="checkbox" onchange="toggleDay('day-seg')"></div>
+                  </div>
+                  <div class="day-row" id="day-ter-qua">
+                    <div class="day-badge">Terça/Quarta</div>
+                    <div class="day-content"><span><b>Dia Todo:</b> Cold calls, WhatsApp, DM em redes sociais e envio de tabela/catálogo técnico.</span><input type="checkbox" onchange="toggleDay('day-ter-qua')"></div>
+                  </div>
+                  <div class="day-row" id="day-qui">
+                    <div class="day-badge">Quinta</div>
+                    <div class="day-content"><span><b>Dia Todo:</b> Reuniões comerciais/técnicas e cadastro de parceiro (crédito).</span><input type="checkbox" onchange="toggleDay('day-qui')"></div>
+                  </div>
+                  <div class="day-row" id="day-sex">
+                    <div class="day-badge">Sexta</div>
+                    <div class="day-content"><span><b>Manhã:</b> Rota física (visitas). <b>Tarde:</b> Follow-up e revisão de leads das redes sociais.</span><input type="checkbox" onchange="toggleDay('day-sex')"></div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="card">
+                <div class="card-title">Novo Alvo / Lead</div>
+                <form id="lead-form" onsubmit="addLead(event)">
+                  <div class="form-group" style="margin-bottom:10px;"><label>Empresa</label><input type="text" id="comp-name" class="form-control" placeholder="Razão social" required></div>
+                  <div class="form-group" style="margin-bottom:10px;"><label>Segmento</label>
+                    <select id="comp-seg" class="form-control">
+                      <option value="Instaladora CFTV/Alarme">Instaladora CFTV / Alarme</option>
+                      <option value="Integradora Automação">Integradora de Automação</option>
+                      <option value="Monitoramento/Portaria">Monitoramento / Portaria Remota</option>
+                      <option value="Manutenção Predial/Elétrica">Manutenção Predial / Elétrica</option>
+                      <option value="Revenda/Loja">Revenda / Loja de Segurança</option>
+                    </select>
+                  </div>
+                  <div class="form-group" style="margin-bottom:10px;"><label>Origem</label>
+                    <select id="comp-origin" class="form-control">
+                      <option value="JUCESP/Redesim">JUCESP / Redesim</option>
+                      <option value="LinkedIn">Redes Sociais - LinkedIn</option>
+                      <option value="Instagram">Redes Sociais - Instagram</option>
+                      <option value="WhatsApp/Grupo">Grupo de WhatsApp</option>
+                      <option value="Indicação">Indicação</option>
+                      <option value="Ronda Comercial">Ronda Comercial</option>
+                    </select>
+                  </div>
+                  <div class="form-group" style="margin-bottom:10px;"><label>Telefone</label><input type="text" id="comp-phone" class="form-control" placeholder="(13) 99999-0000"></div>
+                  <div class="form-group" style="margin-bottom:10px;"><label>Observações</label><input type="text" id="comp-notes" class="form-control" placeholder="Decisor, perfil social, etc."></div>
+                  <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;">Inserir no Funil</button>
+                </form>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-title">Captação via Redes Sociais</div>
+              <div class="social-grid">
+                <div class="social-channel"><h4>💼 LinkedIn</h4><p>Buscar sócios-instaladores e diretores técnicos com CNAE de instalação/monitoramento na Baixada Santista. Conectar + script 5.</p></div>
+                <div class="social-channel"><h4>📸 Instagram</h4><p>Hashtags #instaladorcftv #integradordeseguranca #alarmesantos. Curtir/comentar e enviar DM (script 6).</p></div>
+                <div class="social-channel"><h4>👥 Grupos WhatsApp/Facebook</h4><p>Participar de grupos de instaladores; postar tabela de novidades semanalmente (script 7).</p></div>
+                <div class="social-channel"><h4>🎯 Isca Digital</h4><p>Kit demonstrativo/desconto de 1ª compra para quem seguir o perfil e preencher o cadastro de parceiro.</p></div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-title">Funil de Prospecção</div>
+              <div class="pipeline-container">
+                <div class="pipe-column"><div class="pipe-header"><span>1. Novos CNPJs</span><span class="pipe-count" id="count-novo">0</span></div><div id="container-novo" style="display:flex;flex-direction:column;gap:9px;"></div></div>
+                <div class="pipe-column"><div class="pipe-header"><span>2. Em Contato</span><span class="pipe-count" id="count-contato">0</span></div><div id="container-contato" style="display:flex;flex-direction:column;gap:9px;"></div></div>
+                <div class="pipe-column"><div class="pipe-header"><span>3. Reunião</span><span class="pipe-count" id="count-reuniao">0</span></div><div id="container-reuniao" style="display:flex;flex-direction:column;gap:9px;"></div></div>
+                <div class="pipe-column"><div class="pipe-header"><span>4. Proposta</span><span class="pipe-count" id="count-proposta">0</span></div><div id="container-proposta" style="display:flex;flex-direction:column;gap:9px;"></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ SEÇÃO CLIENTES ============ -->
+      <section id="section-clientes" class="app-section">
+        <div class="card">
+          <div class="card-title"><span>Clientes Cadastrados</span><button class="btn btn-primary btn-sm" onclick="toggleForm('cliente-form')">+ Novo Cliente</button></div>
+          <div id="cliente-form" class="form-grid hidden">
+            <input type="hidden" id="cliente-edit-id">
+            <div class="form-group"><label>Empresa / Razão Social</label><input class="form-control" id="cli-nome" placeholder="Ex: Alarme Tech Instalações"></div>
+            <div class="form-group"><label>CNPJ</label><input class="form-control" id="cli-cnpj" placeholder="00.000.000/0001-00"></div>
+            <div class="form-group"><label>Segmento</label>
+              <select class="form-control" id="cli-seg">
+                <option value="Instaladora CFTV/Alarme">Instaladora CFTV / Alarme</option>
+                <option value="Integradora Automação">Integradora de Automação</option>
+                <option value="Monitoramento/Portaria">Monitoramento / Portaria Remota</option>
+                <option value="Manutenção Predial/Elétrica">Manutenção Predial / Elétrica</option>
+                <option value="Revenda/Loja">Revenda / Loja de Segurança</option>
+              </select>
+            </div>
+            <div class="form-group"><label>Telefone (WhatsApp)</label><input class="form-control" id="cli-tel" placeholder="13999990000"></div>
+            <div class="form-group"><label>E-mail</label><input class="form-control" id="cli-email" placeholder="contato@empresa.com"></div>
+            <div class="form-group"><label>Endereço</label><input class="form-control" id="cli-end" placeholder="Rua, número, bairro, cidade"></div>
+            <div class="form-group" style="grid-column:1/-1;"><label>Observações</label><input class="form-control" id="cli-obs" placeholder="Decisor, histórico, condição comercial..."></div>
+            <div class="form-actions">
+              <button class="btn btn-primary" onclick="addCliente()">Salvar Cliente</button>
+              <button class="btn btn-ghost" onclick="cancelForm('cliente-form')">Cancelar</button>
+            </div>
+          </div>
+          <div class="table-scroll"><table class="data-table">
+            <thead><tr><th>Empresa</th><th>Segmento</th><th>Contato</th><th>E-mail</th><th>Ações</th></tr></thead>
+            <tbody id="clientes-tbody"></tbody>
+          </table></div>
+          <div id="clientes-empty" class="empty-hint" style="display:none;">Nenhum cliente cadastrado ainda. Clique em "+ Novo Cliente" para começar.</div>
+        </div>
+      </section>
+
+      <!-- ============ SEÇÃO ESTOQUE ============ -->
+      <section id="section-estoque" class="app-section">
+        <div class="card">
+          <div class="card-title"><span>Estoque de Produtos</span><button class="btn btn-primary btn-sm" onclick="toggleForm('produto-form')">+ Novo Produto</button></div>
+          <div id="produto-form" class="form-grid hidden">
+            <input type="hidden" id="produto-edit-id">
+            <div class="form-group"><label>Produto</label><input class="form-control" id="prod-nome" placeholder="Ex: Câmera Dome 2MP IR"></div>
+            <div class="form-group"><label>Marca</label>
+              <select class="form-control" id="prod-marca">
+                <option value="Hikvision">Hikvision</option>
+                <option value="JFL">JFL</option>
+                <option value="NICE">NICE</option>
+                <option value="Control ID">Control ID</option>
+                <option value="Outra">Outra</option>
+              </select>
+            </div>
+            <div class="form-group"><label>Categoria</label>
+              <select class="form-control" id="prod-categoria">
+                <option>Câmera</option><option>DVR/NVR</option><option>Alarme/Central</option>
+                <option>Sensor</option><option>Controle de Acesso</option><option>Automação de Portão</option><option>Acessórios</option>
+              </select>
+            </div>
+            <div class="form-group"><label>SKU</label><input class="form-control" id="prod-sku" placeholder="HIK-DS2CE"></div>
+            <div class="form-group"><label>Preço (R$)</label><input class="form-control" type="number" step="0.01" id="prod-preco" placeholder="189.90"></div>
+            <div class="form-group"><label>Estoque (un)</label><input class="form-control" type="number" id="prod-estoque" placeholder="24"></div>
+            <div class="form-group"><label>Estoque Mínimo</label><input class="form-control" type="number" id="prod-minimo" placeholder="5"></div>
+            <div class="form-actions">
+              <button class="btn btn-primary" onclick="addProduto()">Salvar Produto</button>
+              <button class="btn btn-ghost" onclick="cancelForm('produto-form')">Cancelar</button>
+            </div>
+          </div>
+          <div class="table-scroll"><table class="data-table">
+            <thead><tr><th>Produto</th><th>Marca</th><th>Categoria</th><th>SKU</th><th>Preço</th><th>Estoque</th><th>Status</th><th>Ações</th></tr></thead>
+            <tbody id="estoque-tbody"></tbody>
+          </table></div>
+        </div>
+      </section>
+
+      <!-- ============ SEÇÃO ORÇAMENTOS ============ -->
+      <section id="section-orcamentos" class="app-section">
+        <div class="card">
+          <div class="card-title"><span>Novo Orçamento</span><span class="card-hint">Selecione o cliente, adicione produtos do estoque e gere o PDF</span></div>
+          <div class="form-grid" style="border-style:solid;">
+            <div class="form-group"><label>Cliente</label><select class="form-control" id="orc-cliente"><option value="">Selecione um cliente...</option></select></div>
+            <div class="form-group"><label>Produto</label><select class="form-control" id="orc-produto-select"><option value="">Selecione um produto...</option></select></div>
+            <div class="form-group"><label>Quantidade</label><input class="form-control" type="number" id="orc-qtd" value="1" min="1"></div>
+            <div class="form-group" style="display:flex;align-items:flex-end;"><button class="btn btn-primary" style="width:100%;justify-content:center;" onclick="addItemOrcamento()">+ Adicionar Item</button></div>
+          </div>
+          <div class="table-scroll"><table class="data-table">
+            <thead><tr><th>Produto</th><th>Qtd</th><th>Preço Unit.</th><th>Subtotal</th><th>Disponibilidade</th><th></th></tr></thead>
+            <tbody id="orc-itens-tbody"></tbody>
+          </table></div>
+          <div id="orc-itens-empty" class="empty-hint">Nenhum item adicionado ainda.</div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px;flex-wrap:wrap;gap:12px;">
+            <input class="form-control" id="orc-obs" placeholder="Observações do orçamento (condições, prazo de entrega, etc.)" style="max-width:420px;">
+            <div style="text-align:right;">
+              <div class="stat-label">Total</div>
+              <div class="stat-value mono" id="orc-total" style="font-size:22px;">R$ 0,00</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:12px;">
+            <button class="btn btn-primary" onclick="salvarOrcamento()">Salvar Orçamento</button>
+            <button class="btn btn-ghost" onclick="limparOrcamento()">Limpar</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Orçamentos Salvos</div>
+          <div class="table-scroll"><table class="data-table">
+            <thead><tr><th>Número</th><th>Cliente</th><th>Data</th><th>Itens</th><th>Total</th><th>Status</th><th>Ações</th></tr></thead>
+            <tbody id="orcamentos-tbody"></tbody>
+          </table></div>
+          <div id="orcamentos-empty" class="empty-hint" style="display:none;">Nenhum orçamento salvo ainda.</div>
+        </div>
+      </section>
+
+      <!-- ============ SEÇÃO AGENDA ============ -->
+      <section id="section-agenda" class="app-section">
+        <div class="card">
+          <div class="card-title"><span>Nova Visita / Reunião</span><button class="btn btn-primary btn-sm" onclick="toggleForm('agenda-form')">+ Novo Compromisso</button></div>
+          <div id="agenda-form" class="form-grid hidden">
+            <div class="form-group"><label>Título</label><input class="form-control" id="ag-titulo" placeholder="Ex: Visita técnica - Alarme Tech"></div>
+            <div class="form-group"><label>Tipo</label>
+              <select class="form-control" id="ag-tipo"><option>Visita</option><option>Reunião</option><option>Ligação</option><option>Entrega</option></select>
+            </div>
+            <div class="form-group"><label>Cliente</label><select class="form-control" id="ag-cliente"><option value="">(opcional) Selecione...</option></select></div>
+            <div class="form-group"><label>Data</label><input class="form-control" type="date" id="ag-data"></div>
+            <div class="form-group"><label>Hora</label><input class="form-control" type="time" id="ag-hora" value="09:00"></div>
+            <div class="form-group"><label>Local</label><input class="form-control" id="ag-local" placeholder="Endereço ou 'Remoto'"></div>
+            <div class="form-group" style="grid-column:1/-1;"><label>Notas</label><input class="form-control" id="ag-notas" placeholder="Pauta, documentos necessários, etc."></div>
+            <div class="form-actions">
+              <button class="btn btn-primary" onclick="addEvento()">Salvar Compromisso</button>
+              <button class="btn btn-ghost" onclick="cancelForm('agenda-form')">Cancelar</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title"><span>Próximos Compromissos</span><span class="card-hint">Clique em "Google Calendar" para adicionar o evento à sua agenda do Google em um clique</span></div>
+          <div id="agenda-list" style="display:flex;flex-direction:column;gap:10px;"></div>
+        </div>
+      </section>
+
+      <!-- ============ SEÇÃO CATÁLOGO ============ -->
+      <section id="section-catalogo" class="app-section">
+        <div class="catalog-hero">
+          <img src="data:image/jpeg;base64,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" alt="Logo Castseg">
+          <div class="catalog-hero-text">
+            <h3>Catálogo de Produtos Castseg</h3>
+            <p>Portfólio comercial com a linha principal de cada marca — pronto para enviar ao cliente pelo WhatsApp, e-mail ou impresso.</p>
+          </div>
+          <div class="catalog-hero-actions">
+            <a class="btn btn-primary" href="Catalogo_Castseg_Distribuicao.pdf" target="_blank" rel="noopener">&#8681; Baixar Catálogo em PDF</a>
+            <button class="btn btn-ghost" style="color:#fff;border-color:rgba(255,255,255,0.25);" onclick="compartilharCatalogo()">Compartilhar link</button>
+          </div>
+        </div>
+
+        <div class="card catalog-brand-block">
+          <div class="catalog-brand-head"><span class="badge badge-neutral">HIKVISION</span><h4>Linha completa — CFTV e Controle de Acesso</h4></div>
+          <div class="catalog-grid">
+            <div class="catalog-card"><div class="catalog-icon" style="background:#fff0e8;">📷</div><div><h5>Câmeras Dome, Bullet e IP</h5><p>HD, Full HD/4K, visão noturna e IA para detecção de pessoas e veículos.</p></div></div>
+            <div class="catalog-card"><div class="catalog-icon" style="background:#e8f2fe;">🖥️</div><div><h5>DVR / NVR Turbo HD e IP</h5><p>4 a 32 canais, acesso remoto via app e gravação em nuvem.</p></div></div>
+            <div class="catalog-card"><div class="catalog-icon" style="background:#f3edfe;">🙂</div><div><h5>Leitores Faciais e Biometria</h5><p>Reconhecimento facial para portarias, condomínios e empresas.</p></div></div>
+            <div class="catalog-card"><div class="catalog-icon" style="background:#e6f9f0;">☎️</div><div><h5>Porteiros / Intercomunicadores</h5><p>Vídeo porteiros IP e analógicos com liberação remota pelo app.</p></div></div>
+          </div>
+        </div>
+
+        <div class="card catalog-brand-block">
+          <div class="catalog-brand-head"><span class="badge badge-neutral">JFL</span><h4>Linha completa — Alarmes e Controle de Acesso</h4></div>
+          <div class="catalog-grid">
+            <div class="catalog-card"><div class="catalog-icon" style="background:#fde8e6;">🚨</div><div><h5>Centrais de Alarme Monitoradas</h5><p>Comunicação via app, discadora e módulo de monitoramento.</p></div></div>
+            <div class="catalog-card"><div class="catalog-icon" style="background:#e8f2fe;">📡</div><div><h5>Sensores IV e Sem Fio</h5><p>Para ambientes internos e externos, com opções pet e alto alcance.</p></div></div>
+            <div class="catalog-card"><div class="catalog-icon" style="background:#fde8e6;">🔔</div><div><h5>Sirenes e Acessórios</h5><p>Sirenes de alta potência, baterias reserva e teclados de comando.</p></div></div>
+            <div class="catalog-card"><div class="catalog-icon" style="background:#f3edfe;">🔐</div><div><h5>Controle de Acesso e Fechaduras</h5><p>Fechaduras eletrônicas compatíveis com a linha de alarmes JFL.</p></div></div>
+          </div>
+        </div>
+
+        <div class="card catalog-brand-block">
+          <div class="catalog-brand-head"><span class="badge badge-neutral">NICE</span><h4>Linha completa — Automação de Portões</h4></div>
+          <div class="catalog-grid">
+            <div class="catalog-card"><div class="catalog-icon" style="background:#fef3e0;">⚙️</div><div><h5>Automatizador Portão Deslizante</h5><p>Motores robustos para portões residenciais e industriais de correr.</p></div></div>
+            <div class="catalog-card"><div class="catalog-icon" style="background:#fef3e0;">⚙️</div><div><h5>Automatizador Basculante e Pivotante</h5><p>Soluções completas para os principais tipos de portão e cancela.</p></div></div>
+            <div class="catalog-card"><div class="catalog-icon" style="background:#e8f2fe;">📶</div><div><h5>Acessórios de Automação</h5><p>Controles remotos, fotocélulas, placas eletrônicas e baterias reserva.</p></div></div>
+          </div>
+        </div>
+
+        <div class="card catalog-brand-block">
+          <div class="catalog-brand-head"><span class="badge badge-neutral">AGL · MCM · TECHPOWER/TECPOWER</span><h4>Energia, Nobreaks, Fontes e Acessórios</h4></div>
+          <div class="catalog-grid">
+            <div class="catalog-card"><div class="catalog-icon" style="background:#fef3e0;">🔋</div><div><h5>Nobreaks AGL</h5><p>Linha residencial e comercial para proteção de equipamentos de segurança e TI.</p></div></div>
+            <div class="catalog-card"><div class="catalog-icon" style="background:#fef3e0;">🔋</div><div><h5>Nobreaks e Estabilizadores MCM</h5><p>Proteção elétrica completa em diferentes potências.</p></div></div>
+            <div class="catalog-card"><div class="catalog-icon" style="background:#e6f9f0;">🔌</div><div><h5>Fontes Techpower / Tecpower</h5><p>Fontes chaveadas para CFTV, alarmes e controle de acesso.</p></div></div>
+            <div class="catalog-card"><div class="catalog-icon" style="background:#e6f9f0;">🔋</div><div><h5>Baterias e Acessórios</h5><p>Baterias seladas e acessórios complementares para nobreaks e alarmes.</p></div></div>
+          </div>
+        </div>
+
+        <div class="catalog-cta">
+          <p><strong>Essa é só a linha principal.</strong> Trabalhamos com o catálogo completo de cada marca — para mais informações, entre em contato com nosso time comercial.</p>
+          <a class="btn btn-primary" href="Catalogo_Castseg_Distribuicao.pdf" target="_blank" rel="noopener">Abrir PDF completo</a>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</div>
+
+<script>
+/* ===================== ESTADO / STORAGE ===================== */
+let leads = JSON.parse(localStorage.getItem('castseg_leads_dist')) || [];
+let metaCount = parseInt(localStorage.getItem('castseg_meta_dist')) || 0;
+let clientes = JSON.parse(localStorage.getItem('castseg_clientes')) || [];
+let estoque = JSON.parse(localStorage.getItem('castseg_estoque')) || null;
+let orcamentos = JSON.parse(localStorage.getItem('castseg_orcamentos')) || [];
+let agenda = JSON.parse(localStorage.getItem('castseg_agenda')) || [];
+let orcCounter = parseInt(localStorage.getItem('castseg_orc_counter')) || 0;
+let orcamentoAtualItens = [];
+
+if(!estoque){
+  estoque = [
+    {id:1,nome:'Câmera Dome 2MP IR',marca:'Hikvision',categoria:'Câmera',sku:'HIK-DS2CE',preco:189.90,estoque:24,minimo:5},
+    {id:2,nome:'DVR 8 Canais Turbo HD',marca:'Hikvision',categoria:'DVR/NVR',sku:'HIK-DVR08',preco:549.00,estoque:8,minimo:3},
+    {id:3,nome:'Central de Alarme 8 Zonas',marca:'JFL',categoria:'Alarme/Central',sku:'JFL-ACT8',preco:389.00,estoque:2,minimo:5},
+    {id:4,nome:'Sensor IV Sem Fio',marca:'JFL',categoria:'Sensor',sku:'JFL-SF400',preco:79.90,estoque:40,minimo:10},
+    {id:5,nome:'Motor de Portão Deslizante',marca:'NICE',categoria:'Automação de Portão',sku:'NICE-DZ',preco:1290.00,estoque:0,minimo:2},
+    {id:6,nome:'Controlador de Acesso Biométrico',marca:'Control ID',categoria:'Controle de Acesso',sku:'CID-IDF',preco:899.00,estoque:6,minimo:2}
+  ];
+}
+
+document.getElementById('meta-count').innerText = metaCount;
+
+function saveAll(){
+  localStorage.setItem('castseg_leads_dist', JSON.stringify(leads));
+  localStorage.setItem('castseg_meta_dist', metaCount.toString());
+  localStorage.setItem('castseg_clientes', JSON.stringify(clientes));
+  localStorage.setItem('castseg_estoque', JSON.stringify(estoque));
+  localStorage.setItem('castseg_orcamentos', JSON.stringify(orcamentos));
+  localStorage.setItem('castseg_agenda', JSON.stringify(agenda));
+  localStorage.setItem('castseg_orc_counter', orcCounter.toString());
+  updateStats();
+}
+
+function val(id){ return document.getElementById(id).value; }
+function setVal(id,v){ document.getElementById(id).value = v || ''; }
+
+/* ===================== NAVEGAÇÃO ===================== */
+const sectionTitles = {
+  prospeccao:'Prospecção & Funil', clientes:'Clientes', estoque:'Estoque',
+  orcamentos:'Orçamentos', agenda:'Agenda', catalogo:'Catálogo de Produtos'
+};
+function switchSection(id){
+  document.querySelectorAll('.app-section').forEach(s=>s.classList.remove('active'));
+  document.getElementById('section-'+id).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.querySelector('.nav-item[data-section="'+id+'"]').classList.add('active');
+  document.getElementById('section-title').innerText = sectionTitles[id];
+  closeNav();
+}
+
+/* ===================== MENU MOBILE (HAMBÚRGUER) ===================== */
+function openNav(){
+  document.getElementById('app-nav').classList.add('open');
+  document.getElementById('nav-overlay').classList.add('open');
+}
+function closeNav(){
+  document.getElementById('app-nav').classList.remove('open');
+  document.getElementById('nav-overlay').classList.remove('open');
+}
+function compartilharCatalogo(){
+  const url = window.location.href.replace(/[^/]*$/, '') + 'Catalogo_Castseg_Distribuicao.pdf';
+  if(navigator.share){
+    navigator.share({ title:'Catálogo Castseg Distribuição', url }).catch(()=>{});
+  } else {
+    navigator.clipboard.writeText(url);
+    alert('Link do catálogo copiado! É só colar na conversa com o cliente.');
+  }
+}
+
+function toggleForm(id){
+  const f = document.getElementById(id);
+  f.classList.toggle('hidden');
+}
+function cancelForm(id){
+  const f = document.getElementById(id);
+  f.querySelectorAll('input').forEach(i=>i.value='');
+  f.classList.add('hidden');
+}
+
+/* ===================== META / SCRIPTS / ROTINA ===================== */
+function updateMeta(v){
+  metaCount = Math.max(0, metaCount+v);
+  document.getElementById('meta-count').innerText = metaCount;
+  saveAll();
+}
+function toggleDay(id){ document.getElementById(id).classList.toggle('active'); }
+function copyText(el){
+  const label = el.querySelector('.script-label');
+  let text = el.innerText;
+  if(label) text = text.replace(label.innerText,'').trim();
+  navigator.clipboard.writeText(text);
+  alert('Roteiro copiado para a área de transferência!');
+}
+
+/* ===================== LEADS / FUNIL ===================== */
+function addLead(e){
+  e.preventDefault();
+  const newLead = {
+    id: Date.now(),
+    name: val('comp-name'), seg: val('comp-seg'), origin: val('comp-origin'),
+    phone: val('comp-phone'), notes: val('comp-notes'), stage:'novo'
+  };
+  leads.push(newLead);
+  saveAll();
+  renderLeads();
+  document.getElementById('lead-form').reset();
+}
+function moveLead(id,next){
+  leads = leads.map(l=> l.id===id ? {...l, stage:next} : l);
+  saveAll(); renderLeads();
+}
+function deleteLead(id){
+  if(confirm('Remover este lead do funil?')){
+    leads = leads.filter(l=>l.id!==id);
+    saveAll(); renderLeads();
+  }
+}
+function converterLeadEmCliente(id){
+  const lead = leads.find(l=>l.id===id);
+  if(!lead) return;
+  switchSection('clientes');
+  document.getElementById('cliente-form').classList.remove('hidden');
+  setVal('cli-nome', lead.name);
+  setVal('cli-seg', lead.seg);
+  setVal('cli-tel', lead.phone);
+  setVal('cli-obs', lead.notes);
+}
+function renderLeads(){
+  const containers = {
+    novo: document.getElementById('container-novo'), contato: document.getElementById('container-contato'),
+    reuniao: document.getElementById('container-reuniao'), proposta: document.getElementById('container-proposta')
+  };
+  Object.values(containers).forEach(c=>c.innerHTML='');
+  const counts = {novo:0,contato:0,reuniao:0,proposta:0};
+  leads.forEach(lead=>{
+    counts[lead.stage]++;
+    let nextBtn = '';
+    if(lead.stage==='novo') nextBtn = '<button class="link-btn" onclick="moveLead('+lead.id+',\'contato\')">Contatar &rarr;</button>';
+    if(lead.stage==='contato') nextBtn = '<button class="link-btn" onclick="moveLead('+lead.id+',\'reuniao\')">Agendar &rarr;</button>';
+    if(lead.stage==='reuniao') nextBtn = '<button class="link-btn" onclick="moveLead('+lead.id+',\'proposta\')">Proposta &rarr;</button>';
+    if(lead.stage==='proposta') nextBtn = '<button class="link-btn" onclick="converterLeadEmCliente('+lead.id+')">Virar Cliente &rarr;</button>';
+    const card = '<div class="lead-card">'+
+      '<div class="lead-title">'+lead.name+'</div>'+
+      '<div class="lead-meta">📞 '+(lead.phone||'Sem Tel')+'</div>'+
+      '<div class="lead-meta">📝 '+(lead.notes||'')+'</div>'+
+      '<div class="lead-tags"><span class="badge badge-neutral">'+lead.seg+'</span><span class="badge badge-info">'+lead.origin+'</span></div>'+
+      '<div class="lead-actions"><button class="link-btn delete" onclick="deleteLead('+lead.id+')">Remover</button>'+nextBtn+'</div>'+
+    '</div>';
+    if(containers[lead.stage]) containers[lead.stage].innerHTML += card;
+  });
+  document.getElementById('count-novo').innerText = counts.novo;
+  document.getElementById('count-contato').innerText = counts.contato;
+  document.getElementById('count-reuniao').innerText = counts.reuniao;
+  document.getElementById('count-proposta').innerText = counts.proposta;
+}
+
+/* ===================== CLIENTES ===================== */
+function addCliente(){
+  if(!val('cli-nome')){ alert('Informe o nome da empresa.'); return; }
+  const editId = val('cliente-edit-id');
+  const data = {
+    nome: val('cli-nome'), cnpj: val('cli-cnpj'), segmento: val('cli-seg'),
+    telefone: val('cli-tel'), email: val('cli-email'), endereco: val('cli-end'), obs: val('cli-obs')
+  };
+  if(editId){
+    clientes = clientes.map(c=> String(c.id)===String(editId) ? {...c, ...data} : c);
+  } else {
+    data.id = Date.now();
+    clientes.push(data);
+  }
+  saveAll();
+  renderClientes();
+  refreshSelects();
+  cancelForm('cliente-form');
+  document.getElementById('cliente-edit-id').value='';
+}
+function editCliente(id){
+  const c = clientes.find(x=>x.id===id);
+  if(!c) return;
+  document.getElementById('cliente-form').classList.remove('hidden');
+  setVal('cliente-edit-id', c.id);
+  setVal('cli-nome', c.nome); setVal('cli-cnpj', c.cnpj); setVal('cli-seg', c.segmento);
+  setVal('cli-tel', c.telefone); setVal('cli-email', c.email); setVal('cli-end', c.endereco); setVal('cli-obs', c.obs);
+}
+function deleteCliente(id){
+  if(confirm('Excluir este cliente?')){
+    clientes = clientes.filter(c=>c.id!==id);
+    saveAll(); renderClientes(); refreshSelects();
+  }
+}
+function irParaOrcamento(id){
+  switchSection('orcamentos');
+  document.getElementById('orc-cliente').value = id;
+}
+function renderClientes(){
+  const tbody = document.getElementById('clientes-tbody');
+  tbody.innerHTML = clientes.map(c=>
+    '<tr><td><b>'+c.nome+'</b><div class="lead-meta">'+(c.cnpj||'')+'</div></td>'+
+    '<td><span class="badge badge-neutral">'+c.segmento+'</span></td>'+
+    '<td>'+(c.telefone||'-')+'</td>'+
+    '<td>'+(c.email||'-')+'</td>'+
+    '<td class="table-actions">'+
+      '<button class="link-btn" onclick="editCliente('+c.id+')">Editar</button>'+
+      '<button class="link-btn" onclick="irParaOrcamento('+c.id+')">Orçamento</button>'+
+      '<button class="link-btn delete" onclick="deleteCliente('+c.id+')">Excluir</button>'+
+    '</td></tr>'
+  ).join('');
+  document.getElementById('clientes-empty').style.display = clientes.length ? 'none' : 'block';
+}
+
+/* ===================== ESTOQUE ===================== */
+function stockStatus(qtd,min){
+  if(qtd<=0) return {label:'Esgotado', cls:'badge-danger'};
+  if(qtd<=min) return {label:'Estoque baixo', cls:'badge-warning'};
+  return {label:'Em estoque', cls:'badge-success'};
+}
+function addProduto(){
+  if(!val('prod-nome')){ alert('Informe o nome do produto.'); return; }
+  const editId = val('produto-edit-id');
+  const data = {
+    nome: val('prod-nome'), marca: val('prod-marca'), categoria: val('prod-categoria'),
+    sku: val('prod-sku'), preco: parseFloat(val('prod-preco'))||0,
+    estoque: parseInt(val('prod-estoque'))||0, minimo: parseInt(val('prod-minimo'))||0
+  };
+  if(editId){
+    estoque = estoque.map(p=> String(p.id)===String(editId) ? {...p, ...data} : p);
+  } else {
+    data.id = Date.now();
+    estoque.push(data);
+  }
+  saveAll();
+  renderEstoque();
+  refreshSelects();
+  cancelForm('produto-form');
+  document.getElementById('produto-edit-id').value='';
+}
+function editProduto(id){
+  const p = estoque.find(x=>x.id===id);
+  if(!p) return;
+  document.getElementById('produto-form').classList.remove('hidden');
+  setVal('produto-edit-id', p.id);
+  setVal('prod-nome', p.nome); setVal('prod-marca', p.marca); setVal('prod-categoria', p.categoria);
+  setVal('prod-sku', p.sku); setVal('prod-preco', p.preco); setVal('prod-estoque', p.estoque); setVal('prod-minimo', p.minimo);
+}
+function deleteProduto(id){
+  if(confirm('Excluir este produto do estoque?')){
+    estoque = estoque.filter(p=>p.id!==id);
+    saveAll(); renderEstoque(); refreshSelects();
+  }
+}
+function renderEstoque(){
+  const tbody = document.getElementById('estoque-tbody');
+  tbody.innerHTML = estoque.map(p=>{
+    const s = stockStatus(p.estoque, p.minimo);
+    return '<tr><td><b>'+p.nome+'</b></td>'+
+    '<td><span class="badge badge-neutral">'+p.marca+'</span></td>'+
+    '<td>'+p.categoria+'</td>'+
+    '<td class="mono">'+p.sku+'</td>'+
+    '<td class="mono">R$ '+p.preco.toFixed(2)+'</td>'+
+    '<td class="mono">'+p.estoque+' un</td>'+
+    '<td><span class="badge '+s.cls+'">'+s.label+'</span></td>'+
+    '<td class="table-actions">'+
+      '<button class="link-btn" onclick="editProduto('+p.id+')">Editar</button>'+
+      '<button class="link-btn delete" onclick="deleteProduto('+p.id+')">Excluir</button>'+
+    '</td></tr>';
+  }).join('');
+}
+
+/* ===================== SELECTS DINÂMICOS ===================== */
+function refreshSelects(){
+  const optsCli = clientes.map(c=>'<option value="'+c.id+'">'+c.nome+'</option>').join('');
+  document.getElementById('orc-cliente').innerHTML = '<option value="">Selecione um cliente...</option>'+optsCli;
+  document.getElementById('ag-cliente').innerHTML = '<option value="">(opcional) Selecione...</option>'+optsCli;
+  document.getElementById('orc-produto-select').innerHTML = '<option value="">Selecione um produto...</option>'+
+    estoque.map(p=>'<option value="'+p.id+'">'+p.nome+' — '+p.marca+' — R$ '+p.preco.toFixed(2)+' (estoque: '+p.estoque+')</option>').join('');
+}
+
+/* ===================== ORÇAMENTOS ===================== */
+function addItemOrcamento(){
+  const prodId = val('orc-produto-select');
+  const qtd = parseInt(val('orc-qtd'))||0;
+  if(!prodId || qtd<=0){ alert('Selecione um produto e uma quantidade válida.'); return; }
+  const prod = estoque.find(p=> String(p.id)===String(prodId));
+  if(!prod) return;
+  const existing = orcamentoAtualItens.find(i=> String(i.produtoId)===String(prod.id));
+  if(existing){ existing.qtd += qtd; }
+  else { orcamentoAtualItens.push({produtoId:prod.id, nome:prod.nome, marca:prod.marca, precoUnit:prod.preco, qtd:qtd, estoqueDisponivel:prod.estoque}); }
+  renderItensOrcamento();
+  setVal('orc-qtd','1');
+}
+function removeItemOrcamento(idx){
+  orcamentoAtualItens.splice(idx,1);
+  renderItensOrcamento();
+}
+function renderItensOrcamento(){
+  const tbody = document.getElementById('orc-itens-tbody');
+  let total = 0;
+  tbody.innerHTML = orcamentoAtualItens.map((item,idx)=>{
+    const subtotal = item.precoUnit*item.qtd;
+    total += subtotal;
+    const ok = item.qtd <= item.estoqueDisponivel;
+    return '<tr><td>'+item.nome+' <span class="badge badge-neutral">'+item.marca+'</span></td>'+
+    '<td class="mono">'+item.qtd+'</td>'+
+    '<td class="mono">R$ '+item.precoUnit.toFixed(2)+'</td>'+
+    '<td class="mono">R$ '+subtotal.toFixed(2)+'</td>'+
+    '<td>'+(ok?'<span class="badge badge-success">Disponível</span>':'<span class="badge badge-danger">Insuficiente ('+item.estoqueDisponivel+' un)</span>')+'</td>'+
+    '<td><button class="link-btn delete" onclick="removeItemOrcamento('+idx+')">Remover</button></td></tr>';
+  }).join('');
+  document.getElementById('orc-total').innerText = 'R$ '+total.toFixed(2);
+  document.getElementById('orc-itens-empty').style.display = orcamentoAtualItens.length ? 'none' : 'block';
+}
+function limparOrcamento(){
+  orcamentoAtualItens = [];
+  renderItensOrcamento();
+  setVal('orc-obs','');
+}
+function salvarOrcamento(){
+  const clienteId = val('orc-cliente');
+  if(!clienteId){ alert('Selecione um cliente.'); return; }
+  if(orcamentoAtualItens.length===0){ alert('Adicione ao menos um produto.'); return; }
+  const cliente = clientes.find(c=> String(c.id)===String(clienteId));
+  orcCounter++;
+  const total = orcamentoAtualItens.reduce((s,i)=>s+i.precoUnit*i.qtd,0);
+  const novo = {
+    id: Date.now(), numero: 'ORC-'+String(orcCounter).padStart(4,'0'),
+    clienteId: cliente.id, clienteNome: cliente.nome, clienteTelefone: cliente.telefone,
+    data: new Date().toISOString().slice(0,10),
+    itens: JSON.parse(JSON.stringify(orcamentoAtualItens)),
+    total: total, status:'Rascunho', obs: val('orc-obs'), baixaEstoque:false
+  };
+  orcamentos.push(novo);
+  orcamentoAtualItens = [];
+  renderItensOrcamento();
+  setVal('orc-cliente',''); setVal('orc-obs','');
+  saveAll();
+  renderOrcamentos();
+  alert('Orçamento '+novo.numero+' salvo com sucesso!');
+}
+function updateOrcamentoStatus(id,status){
+  orcamentos = orcamentos.map(o=>{
+    if(o.id===id){
+      if(status==='Aprovado' && !o.baixaEstoque){
+        o.itens.forEach(item=>{
+          const p = estoque.find(pr=>pr.id===item.produtoId);
+          if(p) p.estoque = Math.max(0, p.estoque - item.qtd);
+        });
+        o.baixaEstoque = true;
+      }
+      o.status = status;
+    }
+    return o;
+  });
+  saveAll();
+  renderOrcamentos();
+  renderEstoque();
+  refreshSelects();
+}
+function deleteOrcamento(id){
+  if(confirm('Excluir este orçamento?')){
+    orcamentos = orcamentos.filter(o=>o.id!==id);
+    saveAll(); renderOrcamentos();
+  }
+}
+function formatDate(d){
+  if(!d) return '';
+  const p = d.split('-');
+  return p[2]+'/'+p[1]+'/'+p[0];
+}
+function renderOrcamentos(){
+  const tbody = document.getElementById('orcamentos-tbody');
+  tbody.innerHTML = [...orcamentos].reverse().map(o=>
+    '<tr><td class="mono">'+o.numero+'</td>'+
+    '<td>'+o.clienteNome+'</td>'+
+    '<td>'+formatDate(o.data)+'</td>'+
+    '<td class="mono">'+o.itens.length+'</td>'+
+    '<td class="mono">R$ '+o.total.toFixed(2)+'</td>'+
+    '<td><select class="status-select" onchange="updateOrcamentoStatus('+o.id+',this.value)">'+
+      ['Rascunho','Enviado','Aprovado','Recusado'].map(s=>'<option value="'+s+'" '+(o.status===s?'selected':'')+'>'+s+'</option>').join('')+
+    '</select></td>'+
+    '<td class="table-actions">'+
+      '<button class="link-btn" onclick="gerarPDFOrcamento('+o.id+')">PDF</button>'+
+      '<button class="link-btn" onclick="enviarWhatsApp('+o.id+')" style="color:var(--success);">WhatsApp</button>'+
+      '<button class="link-btn delete" onclick="deleteOrcamento('+o.id+')">Excluir</button>'+
+    '</td></tr>'
+  ).join('');
+  document.getElementById('orcamentos-empty').style.display = orcamentos.length ? 'none' : 'block';
+}
+function gerarPDFOrcamento(id){
+  const o = orcamentos.find(x=>x.id===id);
+  if(!o) return;
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  doc.setFont('helvetica','bold'); doc.setFontSize(16); doc.setTextColor(255,107,53);
+  doc.text('CASTSEG DISTRIBUIÇÃO', 14, 18);
+  doc.setFontSize(9); doc.setTextColor(100);
+  doc.text('Distribuidor Autorizado Hikvision - JFL - NICE - Control ID', 14, 24);
+  doc.setDrawColor(220); doc.line(14,28,196,28);
+  doc.setFontSize(11); doc.setTextColor(20);
+  doc.text('Orcamento: '+o.numero, 14, 38);
+  doc.text('Data: '+formatDate(o.data), 150, 38);
+  doc.text('Cliente: '+o.clienteNome, 14, 45);
+  const cliente = clientes.find(c=>c.id===o.clienteId);
+  doc.setFontSize(9);
+  if(cliente) doc.text('CNPJ: '+(cliente.cnpj||'-')+'   Contato: '+(cliente.telefone||'-'), 14, 51);
+  const rows = o.itens.map(i=>[i.nome, i.marca, String(i.qtd), 'R$ '+i.precoUnit.toFixed(2), 'R$ '+(i.precoUnit*i.qtd).toFixed(2)]);
+  doc.autoTable({ startY:58, head:[['Produto','Marca','Qtd','Preco Unit.','Subtotal']], body:rows, headStyles:{fillColor:[15,23,41]}, styles:{fontSize:9} });
+  const finalY = doc.lastAutoTable.finalY + 10;
+  doc.setFontSize(12); doc.setFont('helvetica','bold');
+  doc.text('TOTAL: R$ '+o.total.toFixed(2), 150, finalY);
+  if(o.obs){
+    doc.setFontSize(9); doc.setFont('helvetica','normal');
+    doc.text('Observacoes: '+o.obs, 14, finalY+10, {maxWidth:180});
+  }
+  doc.setFontSize(8); doc.setTextColor(150);
+  doc.text('Orcamento valido por 7 dias, sujeito a disponibilidade de estoque.', 14, 285);
+  doc.save(o.numero+'_'+o.clienteNome.replace(/\s+/g,'_')+'.pdf');
+}
+function enviarWhatsApp(id){
+  const o = orcamentos.find(x=>x.id===id);
+  if(!o) return;
+  gerarPDFOrcamento(id);
+  const cliente = clientes.find(c=>c.id===o.clienteId);
+  let phone = (cliente && cliente.telefone) ? cliente.telefone.replace(/\D/g,'') : '';
+  if(phone && !phone.startsWith('55')) phone = '55'+phone;
+  const msg = 'Olá '+o.clienteNome+', segue o orçamento '+o.numero+' da Castseg Distribuição no valor total de R$ '+o.total.toFixed(2)+'. O PDF foi baixado agora no seu computador — é só anexar aqui na conversa. Qualquer dúvida, estou à disposição!';
+  const url = phone ? ('https://wa.me/'+phone+'?text='+encodeURIComponent(msg)) : ('https://wa.me/?text='+encodeURIComponent(msg));
+  window.open(url,'_blank');
+}
+
+/* ===================== AGENDA ===================== */
+function addEvento(){
+  if(!val('ag-titulo') || !val('ag-data')){ alert('Informe ao menos o título e a data.'); return; }
+  agenda.push({
+    id: Date.now(), titulo: val('ag-titulo'), tipo: val('ag-tipo'), clienteId: val('ag-cliente'),
+    data: val('ag-data'), hora: val('ag-hora'), local: val('ag-local'), notas: val('ag-notas')
+  });
+  saveAll();
+  renderAgenda();
+  cancelForm('agenda-form');
+}
+function deleteEvento(id){
+  if(confirm('Excluir este compromisso?')){
+    agenda = agenda.filter(a=>a.id!==id);
+    saveAll(); renderAgenda();
+  }
+}
+function formatDateShort(d){
+  if(!d) return '';
+  const meses=['JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ'];
+  const p = d.split('-');
+  return p[2]+' '+meses[parseInt(p[1])-1];
+}
+function googleCalendarLink(a){
+  const dataFmt = (a.data||'').replace(/-/g,'');
+  const hora = (a.hora||'09:00');
+  const [h,m] = hora.split(':').map(Number);
+  const start = dataFmt+'T'+String(h).padStart(2,'0')+String(m).padStart(2,'0')+'00';
+  const endH = (h+1)%24;
+  const end = dataFmt+'T'+String(endH).padStart(2,'0')+String(m).padStart(2,'0')+'00';
+  const text = encodeURIComponent(a.titulo||'Compromisso Castseg');
+  const details = encodeURIComponent(a.notas||'');
+  const location = encodeURIComponent(a.local||'');
+  return 'https://calendar.google.com/calendar/render?action=TEMPLATE&text='+text+'&dates='+start+'/'+end+'&details='+details+'&location='+location;
+}
+function renderAgenda(){
+  const list = document.getElementById('agenda-list');
+  const sorted = [...agenda].sort((a,b)=> (a.data+(a.hora||'')).localeCompare(b.data+(b.hora||'')));
+  if(sorted.length===0){
+    list.innerHTML = '<div class="empty-hint">Nenhum compromisso cadastrado ainda.</div>';
+    return;
+  }
+  list.innerHTML = sorted.map(a=>{
+    const cliente = clientes.find(c=> String(c.id)===String(a.clienteId));
+    return '<div class="agenda-item">'+
+      '<div class="agenda-date"><span class="mono">'+formatDateShort(a.data)+'</span><span>'+(a.hora||'')+'</span></div>'+
+      '<div class="agenda-body">'+
+        '<div class="agenda-title">'+a.titulo+' <span class="badge badge-info">'+a.tipo+'</span></div>'+
+        '<div class="agenda-meta">'+(cliente?('👤 '+cliente.nome+' &middot; '):'')+(a.local?('📍 '+a.local):'')+'</div>'+
+        (a.notas?('<div class="agenda-notas">'+a.notas+'</div>'):'')+
+      '</div>'+
+      '<div class="agenda-actions">'+
+        '<a class="btn btn-ghost btn-sm" target="_blank" href="'+googleCalendarLink(a)+'">+ Google Calendar</a>'+
+        '<button class="link-btn delete" onclick="deleteEvento('+a.id+')">Excluir</button>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+}
+
+/* ===================== ESTATÍSTICAS ===================== */
+function updateStats(){
+  document.getElementById('stat-leads').innerText = leads.length;
+  document.getElementById('stat-clientes').innerText = clientes.length;
+  const abertos = orcamentos.filter(o=>o.status==='Rascunho'||o.status==='Enviado');
+  document.getElementById('stat-orcamentos').innerText = abertos.length;
+  document.getElementById('stat-orcamentos-valor').innerText = 'R$ '+abertos.reduce((s,o)=>s+o.total,0).toFixed(2);
+  const now = new Date();
+  const upcoming = agenda
+    .filter(a=>a.data)
+    .filter(a=> new Date(a.data+'T'+(a.hora||'00:00')) >= now)
+    .sort((a,b)=> (a.data+(a.hora||'')).localeCompare(b.data+(b.hora||'')))[0];
+  document.getElementById('stat-agenda').innerText = upcoming ? (formatDate(upcoming.data)+' '+(upcoming.hora||'')) : 'Nenhum';
+}
+
+/* ===================== INICIALIZAÇÃO ===================== */
+renderLeads();
+renderClientes();
+renderEstoque();
+renderOrcamentos();
+renderAgenda();
+refreshSelects();
+updateStats();
+</script>
+</body>
+</html>
